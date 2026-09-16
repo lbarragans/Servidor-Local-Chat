@@ -15,7 +15,7 @@ func TestServeConnReplaysHistoryAndBroadcasts(t *testing.T) {
 	}
 	defer server.Close()
 
-	firstServer, firstClient := net.Pipe()
+	firstServer, firstClient := testConnection(t)
 	go server.ServeConn(firstServer)
 	firstReader := bufio.NewReader(firstClient)
 	sendRequest(t, firstClient, Request{Type: "message", User: "ana", Text: "hola"})
@@ -24,7 +24,7 @@ func TestServeConnReplaysHistoryAndBroadcasts(t *testing.T) {
 		t.Fatalf("expected first message, got %#v", event)
 	}
 
-	secondServer, secondClient := net.Pipe()
+	secondServer, secondClient := testConnection(t)
 	go server.ServeConn(secondServer)
 	secondReader := bufio.NewReader(secondClient)
 	replayed := readEvent(t, secondReader)
@@ -40,11 +40,33 @@ func TestServeConnReplaysHistoryAndBroadcasts(t *testing.T) {
 	_ = secondClient.Close()
 }
 
+func testConnection(t *testing.T) (net.Conn, net.Conn) {
+	t.Helper()
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	serverConn := make(chan net.Conn, 1)
+	go func() {
+		conn, acceptErr := listener.Accept()
+		if acceptErr == nil {
+			serverConn <- conn
+		}
+	}()
+	clientConn, err := net.Dial("tcp", listener.Addr().String())
+	if err != nil {
+		_ = listener.Close()
+		t.Fatal(err)
+	}
+	_ = listener.Close()
+	return <-serverConn, clientConn
+}
+
 func sendRequest(t *testing.T, conn net.Conn, request Request) {
 	t.Helper()
-	go func() {
-		_ = json.NewEncoder(conn).Encode(request)
-	}()
+	if err := json.NewEncoder(conn).Encode(request); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func readEvent(t *testing.T, reader *bufio.Reader) Event {
