@@ -18,7 +18,17 @@ func TestServeConnReplaysHistoryAndBroadcasts(t *testing.T) {
 	firstServer, firstClient := testConnection(t)
 	go server.ServeConn(firstServer)
 	firstReader := bufio.NewReader(firstClient)
+
+	// Enviar mensaje de ana
 	sendRequest(t, firstClient, Request{Type: "message", User: "ana", Text: "hola"})
+
+	// Leer notificación de ingreso del sistema
+	joinEvent := readEvent(t, firstReader)
+	if joinEvent.User != "Sistema" {
+		t.Fatalf("expected join event from Sistema, got %#v", joinEvent)
+	}
+
+	// Leer el mensaje real enviado por ana
 	event := readEvent(t, firstReader)
 	if event.Text != "hola" {
 		t.Fatalf("expected first message, got %#v", event)
@@ -27,15 +37,21 @@ func TestServeConnReplaysHistoryAndBroadcasts(t *testing.T) {
 	secondServer, secondClient := testConnection(t)
 	go server.ServeConn(secondServer)
 	secondReader := bufio.NewReader(secondClient)
-	replayed := readEvent(t, secondReader)
+
+	// Leer historial previo
+	_ = readEvent(t, secondReader) // Join event de Ana
+	replayed := readEvent(t, secondReader) // Mensaje "hola"
 	if replayed.ID != event.ID {
 		t.Fatalf("expected replayed event %d, got %d", event.ID, replayed.ID)
 	}
 
 	sendRequest(t, firstClient, Request{Type: "message", User: "luis", Text: "adios"})
+
+	// Consumir el mensaje enviado por luis
 	if received := readEvent(t, secondReader); received.Text != "adios" {
 		t.Fatalf("expected broadcast, got %#v", received)
 	}
+
 	_ = firstClient.Close()
 	_ = secondClient.Close()
 }

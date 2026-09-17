@@ -1,2 +1,10 @@
+# Archivos de compilación pesados y caché de Flutter
+client/build/
+client/.dart_tool/
+client/.idea/
+client/*.iml
+client/.metadata
+
+# Historial local de pruebas del servidor
 chat-history.jsonl
 chat-server
