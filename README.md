@@ -1,50 +1,107 @@
 # Servidor Local de Chat
 
-Servidor de chat para la materia **Sistemas Embebidos Linux**. El objetivo es
-permitir que varios clientes dentro de una red local conversen en tiempo real y
-reciban el historial existente al conectarse.
+Servidor de chat multihilo desarrollado en **Go** para la materia **Sistemas Embebidos Linux**. Permite la comunicación en tiempo real entre múltiples clientes conectados a una red local mediante sockets TCP y un protocolo de intercambio basado en JSON.
 
-## Estado actual
+---
 
-Esta rama contiene la primera base del servidor:
+## 🚀 Características
 
-- TCP sobre la red local.
-- Protocolo JSON delimitado por saltos de línea.
-- Historial persistente en `chat-history.jsonl`.
-- Reenvío de mensajes a todos los clientes conectados.
-- Reproducción del historial al conectar un cliente nuevo.
+* **Conexión TCP Concurrente:** Manejo de múltiples clientes en simultáneo utilizando *goroutines*.
+* **Persistencia Histórica:** Guardado automático de mensajes en formato `.jsonl` (`chat-history.jsonl`).
+* **Sincronización Automática:** Transmisión del historial acumulado a cada nuevo cliente al momento de conectarse.
+* **Difusión en Tiempo Real (Broadcast):** Envío instantáneo de mensajes entrantes a todos los clientes activos.
+* **Control de Concurrencia:** Uso de cerrojos (`sync.Mutex`) para garantizar la integridad de los datos en memoria y disco.
+* **Cierre Limpio (Graceful Shutdown):** Captura de señales del sistema (`SIGINT`, `SIGTERM`) para cerrar sockets y archivos de forma segura.
 
-Un cliente envía:
+---
 
-```json
-{"type":"message","user":"ana","text":"Hola"}
+## 📁 Estructura del Proyecto
+
+```text
+.
+├── client
+|      └── ...
+├── cmd/
+│   └── server/
+│       └── main.go         # Punto de entrada del servidor
+├── internal/
+│   └── chat/
+│       ├── server.go       # Lógica del servidor, broadcast y persistencia
+│       └── server-test.go  # Pruebas unitarias de integración
+├── go.mod                  # Configuración de módulos en Go
+└── README.md               # Documentación del proyecto
+
 ```
+---
 
-El servidor entrega eventos con este formato:
+## 🛠️ Requisitos Previos
+* Sistema Operativo Linux (o entorno compatible con POSIX).
+* Go (versión 1.22 o superior recomendada).
 
-```json
-{"type":"message","id":1,"user":"ana","text":"Hola","time":"2026-09-16T21:00:00Z"}
-```
+---
 
-## Ejecutar
+## ⚙️ Uso y Ejecución
+1. Iniciar el Servidor
 
-Requiere Go 1.22 o posterior:
+Para iniciar el servidor con los parámetros por defecto (puerto :9000 e historial chat-history.jsonl):
 
 ```bash
-go run ./cmd/server -addr :9000 -history chat-history.jsonl
+
+go run ./cmd/server/main.go
+
 ```
 
-Por defecto escucha en el puerto TCP `9000`. Para aceptar conexiones desde
-otros equipos de la red, usa la IP del equipo servidor en el cliente, por
-ejemplo `192.168.1.20:9000`.
+##Banderas de configuración opcionales:
+  Puedes personalizar el puerto de escucha y la ruta del archivo de historial usando banderas:
 
-## Probar
+  ```bash
+
+  go run ./cmd/server/main.go -addr ":8080" -history "mi-historial.jsonl"
+
+  ```
+
+2. Ejecutar Pruebas Automatizadas
+
+Para validar que la lógica de retransmisión e historial funciona correctamente:
 
 ```bash
+
 go test ./...
+
 ```
 
-El cliente y la definición final del protocolo se integrarán en pasos
-posteriores.
+## 📡 Protocolo de Comunicación (JSON sobre TCP)
 
-Hola
+La comunicación cliente-servidor se realiza enviando registros delimitados por salto de línea (\n).
+
+
+###Envío desde el Cliente (Petición):
+
+```json
+{
+  "type": "message",
+  "user": "camilo",
+  "text": "Hola a todos"
+}
+```
+
+###Respuesta/Difusión del Servidor (Evento):
+
+```json
+{
+  "type": "message",
+  "id": 1,
+  "user": "camilo",
+  "text": "Hola a todos",
+  "time": "2026-09-17T05:30:00Z"
+}
+```
+
+En caso de un error en la solicitud, el servidor devolverá:
+
+```json
+{
+  "type": "error",
+  "text": "un mensaje requiere type, user y text"
+}
+```
