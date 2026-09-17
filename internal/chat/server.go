@@ -42,6 +42,7 @@ type Server struct {
 
 type client struct {
 	conn net.Conn
+	user string // Guarda el nombre del usuario conectado
 	mu   sync.Mutex
 }
 
@@ -88,15 +89,47 @@ func (s *Server) ServeConn(conn net.Conn) {
 			s.send(client, Event{Type: "error", Text: "invalid JSON"})
 			continue
 		}
-		if request.Type != "message" || strings.TrimSpace(request.User) == "" || strings.TrimSpace(request.Text) == "" {
-			s.send(client, Event{Type: "error", Text: "a message requires type, user and text"})
+
+		user := strings.TrimSpace(request.User)
+		if user == "" {
+			s.send(client, Event{Type: "error", Text: "a user is required"})
 			continue
 		}
-		if len([]rune(request.Text)) > maxMessageLength {
-			s.send(client, Event{Type: "error", Text: "message exceeds the maximum length"})
-			continue
+
+		switch request.Type {
+		case "join":
+			// Evento de registro inmediato al ingresar usuario
+			s.mu.Lock()
+			alreadyJoined := (client.user != "")
+			client.user = user
+			s.mu.Unlock()
+
+			if !alreadyJoined {
+				s.publish("Sistema", fmt.Sprintf("%s se ha unido al chat", user))
+			}
+
+		case "message":
+			text := strings.TrimSpace(request.Text)
+			if text == "" {
+				s.send(client, Event{Type: "error", Text: "a message requires text"})
+				continue
+			}
+			if len([]rune(text)) > maxMessageLength {
+				s.send(client, Event{Type: "error", Text: "message exceeds the maximum length"})
+				continue
+			}
+
+			s.mu.Lock()
+			if client.user == "" {
+				client.user = user
+			}
+			s.mu.Unlock()
+
+			s.publish(user, text)
+
+		default:
+			s.send(client, Event{Type: "error", Text: "invalid request type"})
 		}
-		s.publish(request.User, request.Text)
 	}
 }
 
@@ -134,8 +167,14 @@ func (s *Server) register(client *client) error {
 
 func (s *Server) unregister(client *client) {
 	s.mu.Lock()
+	userName := client.user
 	delete(s.clients, client)
 	s.mu.Unlock()
+
+	// Notificar salida si el usuario estuvo identificado
+	if userName != "" {
+		s.publish("Sistema", fmt.Sprintf("%s se ha desconectado", userName))
+	}
 }
 
 func (s *Server) publish(user, text string) {
@@ -143,7 +182,8 @@ func (s *Server) publish(user, text string) {
 	defer s.mu.Unlock()
 
 	s.nextID++
-	event := Event{Type: "message", ID: s.nextID, User: user, Text: text, Time: time.Now().UTC()}
+	// Cambiamos time.Now().UTC() por time.Now().Local()
+	event := Event{Type: "message", ID: s.nextID, User: user, Text: text, Time: time.Now().Local()}
 	record, err := json.Marshal(event)
 	if err != nil {
 		return
