@@ -105,3 +105,9 @@ En caso de un error en la solicitud, el servidor devolverá:
   "text": "un mensaje requiere type, user y text"
 }
 ```
+
+## Callgraph del servidor
+
+La explicación del flujo de llamadas del servidor, incluyendo arranque,
+conexiones, historial, difusión, concurrencia y apagado, está disponible en
+[`docs/server-callgraph.md`](docs/server-callgraph.md).
