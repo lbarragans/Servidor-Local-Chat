@@ -17,18 +17,21 @@ func TestServeConnReplaysHistoryAndBroadcasts(t *testing.T) {
 
 	firstServer, firstClient := testConnection(t)
 	go server.ServeConn(firstServer)
-	firstReader := bufio.NewReader(firstClient)
+	firstReader := json.NewDecoder(bufio.NewReader(firstClient))
 
-	// Enviar mensaje de ana
-	sendRequest(t, firstClient, Request{Type: "message", User: "ana", Text: "hola"})
+	// Registrar primero a Ana para que el servidor anuncie su ingreso.
+	sendRequest(t, firstClient, Request{Type: "join", User: "ana"})
 
-	// Leer notificación de ingreso del sistema
+	// Leer notificación de ingreso del sistema.
 	joinEvent := readEvent(t, firstReader)
 	if joinEvent.User != "Sistema" {
 		t.Fatalf("expected join event from Sistema, got %#v", joinEvent)
 	}
 
-	// Leer el mensaje real enviado por ana
+	// Enviar el mensaje de Ana.
+	sendRequest(t, firstClient, Request{Type: "message", User: "ana", Text: "hola"})
+
+	// Leer el mensaje real enviado por Ana.
 	event := readEvent(t, firstReader)
 	if event.Text != "hola" {
 		t.Fatalf("expected first message, got %#v", event)
@@ -36,18 +39,18 @@ func TestServeConnReplaysHistoryAndBroadcasts(t *testing.T) {
 
 	secondServer, secondClient := testConnection(t)
 	go server.ServeConn(secondServer)
-	secondReader := bufio.NewReader(secondClient)
+	secondReader := json.NewDecoder(bufio.NewReader(secondClient))
 
-	// Leer historial previo
-	_ = readEvent(t, secondReader) // Join event de Ana
-	replayed := readEvent(t, secondReader) // Mensaje "hola"
+	// Leer el evento de ingreso y el mensaje previamente almacenados.
+	_ = readEvent(t, secondReader)
+	replayed := readEvent(t, secondReader)
 	if replayed.ID != event.ID {
 		t.Fatalf("expected replayed event %d, got %d", event.ID, replayed.ID)
 	}
 
 	sendRequest(t, firstClient, Request{Type: "message", User: "luis", Text: "adios"})
 
-	// Consumir el mensaje enviado por luis
+	// Consumir el mensaje enviado por Luis.
 	if received := readEvent(t, secondReader); received.Text != "adios" {
 		t.Fatalf("expected broadcast, got %#v", received)
 	}
@@ -85,10 +88,10 @@ func sendRequest(t *testing.T, conn net.Conn, request Request) {
 	}
 }
 
-func readEvent(t *testing.T, reader *bufio.Reader) Event {
+func readEvent(t *testing.T, decoder *json.Decoder) Event {
 	t.Helper()
 	var event Event
-	if err := json.NewDecoder(reader).Decode(&event); err != nil {
+	if err := decoder.Decode(&event); err != nil {
 		t.Fatal(err)
 	}
 	return event
