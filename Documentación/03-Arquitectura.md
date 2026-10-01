@@ -131,7 +131,24 @@ flowchart TD
 | Una goroutine por conexión | Modelo de concurrencia nativo de Go, simple y eficiente para la cantidad de clientes esperada en una red local. |
 | Reenvío del historial antes de registrar al cliente | Evita condiciones de carrera donde un cliente nuevo reciba un mensaje de difusión antes que el historial, lo que generaría orden inconsistente. |
 
-## 7. Limitaciones conocidas de la arquitectura actual
+## 7. Diagramas de llamadas (callgraph)
+
+Como parte de una entrega previa del curso, se elaboraron diagramas de
+llamadas (*callgraph*) que detallan, función por función, el flujo interno
+de ejecución tanto del servidor como del cliente. Estos diagramas
+complementan la vista de componentes de la sección 2 y sirven como el
+diagrama de arquitectura adicional a nivel de código:
+
+- [`docs/server-callgraph.md`](../docs/server-callgraph.md): callgraph del
+  servidor (Go), desde `main` y `Server.ServeConn` hasta `register`,
+  `unregister`, `publish`, `send`, `sendLocked` y `writeEvent`.
+- [`docs/client-callgraph.md`](../docs/client-callgraph.md): callgraph del
+  cliente (Flutter), desde `ConnectScreen` hasta `ChatScreen`, el listener
+  del socket y el ciclo de vida (`dispose`).
+
+Ambos incluyen un diagrama Mermaid y un árbol de llamadas en texto.
+
+## 8. Limitaciones conocidas de la arquitectura actual
 
 - Es un **punto único de falla**: si el proceso del servidor se detiene,
   se interrumpe todo el chat (aunque el historial persiste en disco).
@@ -140,7 +157,7 @@ flowchart TD
   límite de tamaño implementado.
 - No hay cifrado de transporte (TLS) ni autenticación de usuarios.
 
-## 8. Información pendiente por parte del equipo
+## 9. Información pendiente por parte del equipo
 
 Para completar esta sección falta que el equipo indique:
 
@@ -150,6 +167,3 @@ Para completar esta sección falta que el equipo indique:
 2. Requisitos de la red local real donde se desplegará (por ejemplo, un
    laboratorio con Raspberry Pi u otro dispositivo embebido actuando como
    servidor), para documentar la topología de despliegue real del curso.
-3. Si se requiere un diagrama de arquitectura adicional en una herramienta
-   específica pedida por el docente (por ejemplo, UML en una herramienta
-   particular), distinto al diagrama Mermaid aquí incluido.
