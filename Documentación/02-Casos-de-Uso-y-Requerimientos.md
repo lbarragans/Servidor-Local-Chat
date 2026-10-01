@@ -123,12 +123,8 @@ Código relacionado: `Server.loadHistory` y `Server.publish` en
 Para completar esta sección, el equipo debería definir y aportar:
 
 1. **Requerimientos de desempeño**: por ejemplo, cantidad esperada de
-   usuarios simultáneos, tamaño máximo esperado del historial, o latencia
-   máxima aceptable en la red local. Actualmente el código no impone un
-   límite de clientes conectados.
-2. **Requerimientos de seguridad**, si se van a agregar (por ejemplo,
-   autenticación de usuarios, cifrado de la conexión). Hoy el sistema no
+   usuarios simultáneos. Actualmente el código no impone un
+   límite de clientes conectados aunque el docente nos comentó de un límite de máximo 10 personas simultáneas.
+2. **Requerimientos de seguridad**: si se van a agregar (por ejemplo,
+   autenticación de usuarios, cifrado de la conexión). Hasta el momento, el sistema no
    implementa ninguno de los dos.
-3. Confirmar si las historias de usuario cubren el alcance que el curso
-   espera evaluar, o si falta agregar alguna (por ejemplo, un caso de uso
-   específico pedido por el docente).

@@ -159,7 +159,7 @@ Ambos incluyen un diagrama Mermaid y un árbol de llamadas en texto.
 
 ## 9. Información pendiente por parte del equipo
 
-Para completar esta sección falta que el equipo indique:
+Información que se puede añadir en un futuro:
 
 1. Si la arquitectura debe evolucionar a algo distinto (por ejemplo,
    WebSockets en vez de TCP crudo, para dar soporte web), ya que el cliente

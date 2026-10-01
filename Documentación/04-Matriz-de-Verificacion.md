@@ -104,13 +104,8 @@ flutter test
 
 ## 7. Información pendiente por parte del equipo
 
-Para completar esta matriz, el equipo debería indicar:
+Información que falta para completar el documento:
 
-1. Si existe algún plan de pruebas o formato de matriz específico pedido
-   por el docente de la materia (columnas obligatorias, formato de
-   evidencia, etc.), para ajustar esta tabla a ese formato.
-2. Evidencias de pruebas manuales ya realizadas (capturas de pantalla,
+1. Evidencias de pruebas manuales ya realizadas (capturas de pantalla,
    registros de las pruebas de red descritas en conversaciones previas del
    proyecto) que se quieran anexar como evidencia formal.
-3. Si se debe priorizar alguno de los puntos del backlog de pruebas (§6)
-   para la siguiente entrega.

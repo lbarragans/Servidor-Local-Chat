@@ -105,13 +105,3 @@ Error de protocolo:
 | David Henao Rojas | Servidor (Go) |
 | Juan Camilo Giraldo | Cliente (Flutter) |
 | Daniela Barragán | Cliente (Flutter) |
-
-## 7. Información pendiente por parte del equipo
-
-El contexto académico y de equipo (materia, docente, periodo, integrantes y
-roles) ya quedó documentado en las secciones anteriores. Queda pendiente
-únicamente:
-
-1. Confirmar si alguno de los puntos de la sección 3 ("Fuera de alcance
-   actual") pasa a desarrollarse en esta entrega, para moverlo a la sección
-   2 ("Alcance actual").
