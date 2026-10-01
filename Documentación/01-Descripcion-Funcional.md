@@ -1,9 +1,15 @@
 # Descripción Funcional
 
+| Dato | Valor |
+|---|---|
+| Materia | Programación de sistemas Linux embebidos |
+| Docente | Juan Bernardo Gómez |
+| Periodo académico | 2026-02 |
+
 ## 1. Propósito del proyecto
 
 **Servidor Local de Chat** es un sistema cliente-servidor para la materia
-**Sistemas Embebidos Linux**. Permite que varios usuarios conectados a una
+**Programación de sistemas linux embebidos**. Permite que varios usuarios conectados a una
 misma red local conversen en tiempo real y recuperen el historial de
 mensajes, incluso si no estuvieron conectados cuando se escribieron.
 
@@ -35,21 +41,21 @@ El proyecto tiene dos componentes:
   solicitud desconocido).
 - Cierra ordenadamente el servidor ante `Ctrl+C` (`SIGINT`) o `SIGTERM`.
 
-## 3. Fuera de alcance actual
+## 3. Fuera de alcance actual (posible alcance futuro)
 
-Estas funcionalidades **no** están implementadas todavía en el código:
+Estas funcionalidades **no** están implementadas todavía en el código, pero
+son candidatas a desarrollarse en una siguiente entrega del proyecto:
 
 - Autenticación o contraseñas de usuario.
 - Cifrado de la comunicación (el protocolo viaja en texto plano sobre TCP).
-- Salas o canales de chat separados (solo existe un único canal global).
 - Edición o borrado de mensajes ya enviados.
-- Envío de archivos o imágenes.
 - Límite de usuarios conectados simultáneamente.
 - Persistencia en una base de datos (actualmente es un archivo de texto
   plano `.jsonl`).
 
-> Si alguno de estos puntos sí se planea implementar más adelante, se debe
-> actualizar esta sección para reflejarlo.
+> Ninguno de estos puntos está descartado; simplemente no forman parte del
+> alcance entregado hasta ahora. A medida que se implemente alguno, debe
+> moverse de esta lista a la sección 2 ("Alcance actual").
 
 ## 4. Protocolo de comunicación
 
@@ -92,15 +98,20 @@ Error de protocolo:
 | Servidor | Proceso Go que coordina la comunicación y guarda el historial. |
 | Administrador del servidor | Persona que inicia/detiene el proceso del servidor y gestiona el archivo de historial. |
 
-## 6. Información pendiente por parte del equipo
+## 6. Integrantes del equipo y roles
 
-Para completar esta descripción funcional con el contexto académico del
-proyecto, falta que el equipo indique:
+| Integrante | Rol / componente a cargo |
+|---|---|
+| David Henao Rojas | Servidor (Go) |
+| Juan Camilo Giraldo | Cliente (Flutter) |
+| Daniela Barragán | Cliente (Flutter) |
 
-1. Nombre completo del curso/materia, docente y periodo académico (para la
-   portada de la documentación).
-2. Nombres de los integrantes del equipo y qué parte desarrolló cada uno
-   (servidor, cliente, documentación, etc.).
-3. Si existe un alcance adicional planeado que todavía no esté en el código
-   (por ejemplo: salas de chat, cifrado, límite de usuarios), para
-   documentarlo como "alcance futuro" en vez de "fuera de alcance".
+## 7. Información pendiente por parte del equipo
+
+El contexto académico y de equipo (materia, docente, periodo, integrantes y
+roles) ya quedó documentado en las secciones anteriores. Queda pendiente
+únicamente:
+
+1. Confirmar si alguno de los puntos de la sección 3 ("Fuera de alcance
+   actual") pasa a desarrollarse en esta entrega, para moverlo a la sección
+   2 ("Alcance actual").
