@@ -20,6 +20,9 @@ la documentación técnica ya existente en:
 4. [Matriz de Verificación](04-Matriz-de-Verificacion.md): trazabilidad
    entre requerimientos y pruebas unitarias/de integración existentes,
    procedimiento de verificación manual y backlog de pruebas pendientes.
+5. [Diagramas de Interacción](05-Diagramas-de-Interaccion.md): diagramas de
+   secuencia (join, envío de mensaje/broadcast, reenvío de historial,
+   manejo de errores y desconexión) entre el cliente y el servidor.
 
 ## Estado y alcance de este contenido
 

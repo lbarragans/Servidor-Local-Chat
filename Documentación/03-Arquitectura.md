@@ -148,6 +148,11 @@ diagrama de arquitectura adicional a nivel de código:
 
 Ambos incluyen un diagrama Mermaid y un árbol de llamadas en texto.
 
+Adicionalmente, [`05-Diagramas-de-Interaccion.md`](05-Diagramas-de-Interaccion.md)
+complementa estos callgraphs con diagramas de secuencia que muestran el
+intercambio de mensajes entre el cliente y el servidor a través de la red
+(join, envío de mensajes, reenvío de historial, errores y desconexión).
+
 ## 8. Limitaciones conocidas de la arquitectura actual
 
 - Es un **punto único de falla**: si el proceso del servidor se detiene,
