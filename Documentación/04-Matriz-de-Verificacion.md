@@ -102,10 +102,93 @@ flutter test
 5. Agregar una prueba que valide el anuncio de salida de usuario
    (RF-08, parte de desconexión).
 
-## 7. Información pendiente por parte del equipo
+## 7. Evidencias de Ejecución y Registros del Sistema (Anexos Formales)
 
-Información que falta para completar el documento:
+A continuación se presentan las evidencias técnicas de las pruebas de software, los registros de consola (*logs*) de los componentes del sistema y la guía de capturas visuales para la entrega final del proyecto.
 
-1. Evidencias de pruebas manuales ya realizadas (capturas de pantalla,
-   registros de las pruebas de red descritas en conversaciones previas del
-   proyecto) que se quieran anexar como evidencia formal.
+### 7.1. Registro de Ejecución de Pruebas Automatizadas
+
+#### A. Pruebas del Servidor (Go - `internal/chat`)
+Ejecución automatizada de la suite de pruebas del servidor validando los 5 casos de uso unitarios y de integración:
+
+```text
+camilo@camilo-LOQ-15IAX9E:~/Escritorio/Linux/Servidor-Local-Chat$ go test ./... -v
+?       [github.com/lbarragans/Servidor-Local-Chat/cmd/server](https://github.com/lbarragans/Servidor-Local-Chat/cmd/server)    [no test files]
+=== RUN   TestServeConnReplaysHistoryAndBroadcasts
+--- PASS: TestServeConnReplaysHistoryAndBroadcasts (0.00s)
+=== RUN   TestLoadHistoryUnit
+--- PASS: TestLoadHistoryUnit (0.00s)
+=== RUN   TestProtocolErrors
+--- PASS: TestProtocolErrors (0.00s)
+=== RUN   TestServerRestartContinuity
+--- PASS: TestServerRestartContinuity (0.00s)
+=== RUN   TestUserDisconnectNotification
+--- PASS: TestUserDisconnectNotification (0.00s)
+PASS
+ok      [github.com/lbarragans/Servidor-Local-Chat/internal/chat](https://github.com/lbarragans/Servidor-Local-Chat/internal/chat) 0.006s
+
+```
+#### B. Pruebas del Cliente (Flutter - client)
+Ejecución de las pruebas de interfaz y componentes en Flutter (ConnectScreen):
+
+```text
+camilo@camilo-LOQ-15IAX9E:~/Escritorio/Linux/Servidor-Local-Chat/client$ flutter test
+Resolving dependencies...
+Got dependencies!
+00:05 +1: All tests passed!
+```
+### 7.2 Pruebas Manuales de Red y Transmisión de Historial (Socket TCP)
+
+Verificación manual de la retransmisión completa del historial almacenado mediante conexión directa vía netcat (nc) al puerto TCP :9000 del servidor en ejecución local:
+
+```text
+camilo@camilo-LOQ-15IAX9E:~/Escritorio/Linux/Servidor-Local-Chat$ nc 127.0.0.1 9000
+{"type":"message","id":1,"user":"Sistema","text":" Sebastian se ha unido al chat","time":"2026-09-16T22:55:16.744269974-05:00"}
+{"type":"message","id":2,"user":"Sebastian","text":"Hola","time":"2026-09-16T22:55:16.744625335-05:00"}
+{"type":"message","id":3,"user":"Sistema","text":" Luz se ha unido al chat","time":"2026-09-16T22:55:26.055866319-05:00"}
+{"type":"message","id":4,"user":"Luz","text":"Hola","time":"2026-09-16T22:55:26.056056773-05:00"}
+{"type":"message","id":5,"user":"Luz","text":"Chao","time":"2026-09-16T22:55:38.933225744-05:00"}
+{"type":"message","id":6,"user":"Sebastian","text":"Adios","time":"2026-09-16T22:55:43.609507647-05:00"}
+{"type":"message","id":7,"user":"Sebastian","text":"Gran charla","time":"2026-09-16T22:55:49.924473765-05:00"}
+{"type":"message","id":8,"user":"Sistema","text":" Sebastian se ha desconectado","time":"2026-09-16T22:55:51.288956931-05:00"}
+{"type":"message","id":9,"user":"Sistema","text":" Luz se ha desconectado","time":"2026-09-16T22:55:55.00687965-05:00"}
+{"type":"message","id":10,"user":"Sistema","text":"Willy se ha unido al chat","time":"2026-09-16T23:00:15.355197329-05:00"}
+{"type":"message","id":11,"user":"Sistema","text":"Estella se ha unido al chat","time":"2026-09-16T23:00:30.941586763-05:00"}
+{"type":"message","id":12,"user":"Sistema","text":"Estella se ha desconectado","time":"2026-09-16T23:00:36.253871792-05:00"}
+{"type":"message","id":13,"user":"Sistema","text":"Willy se ha desconectado","time":"2026-09-16T23:00:40.647411353-05:00"}
+{"type":"message","id":14,"user":"Sistema","text":"Carolina se ha unido al chat","time":"2026-09-16T23:26:19.856252208-05:00"}
+{"type":"message","id":15,"user":"Sistema","text":"Carlota se ha unido al chat","time":"2026-09-16T23:27:27.383110547-05:00"}
+{"type":"message","id":16,"user":"Carlota","text":"Hola Caro","time":"2026-09-16T23:27:47.144824749-05:00"}
+{"type":"message","id":17,"user":"Carolina","text":"Hola Carl","time":"2026-09-16T23:27:59.084365904-05:00"}
+{"type":"message","id":18,"user":"Carlota","text":"Chao","time":"2026-09-16T23:28:05.179477669-05:00"}
+{"type":"message","id":19,"user":"Sistema","text":"Carlota se ha desconectado","time":"2026-09-16T23:28:11.816676593-05:00"}
+{"type":"message","id":20,"user":"Sistema","text":"Carolina se ha desconectado","time":"2026-09-16T23:28:27.8737232-05:00"}
+{"type":"message","id":21,"user":"Sistema","text":"David se ha unido al chat","time":"2026-09-18T13:20:49.71195848-05:00"}
+{"type":"message","id":22,"user":"Sistema","text":"Bernardo se ha unido al chat","time":"2026-09-18T13:21:37.132076727-05:00"}
+{"type":"message","id":23,"user":"Bernardo","text":"Hola","time":"2026-09-18T13:21:42.67702052-05:00"}
+{"type":"message","id":24,"user":"David","text":"Chao","time":"2026-09-18T13:21:45.22828606-05:00"}
+{"type":"message","id":25,"user":"Bernardo","text":"Bye","time":"2026-09-18T13:21:49.395815995-05:00"}
+{"type":"message","id":26,"user":"Sistema","text":"Bernardo se ha desconectado","time":"2026-09-18T13:21:52.412431167-05:00"}
+{"type":"message","id":27,"user":"Sistema","text":"David se ha desconectado","time":"2026-09-18T13:21:58.581425888-05:00"}
+```
+
+###7.3. Evidencias Gráficas del Sistema en Funcionamiento
+(Capturas de pantalla del entorno de desarrollo)
+  Figura 7.1 - Servidor escuchando en puerto de red:
+
+    Servidor Go en ejecución desde la consola Linux aceptando peticiones TCP en el puerto :9000 y persistiendo datos en formato JSON-L.
+  <img width="866" height="670" alt="imagen" src="https://github.com/user-attachments/assets/6471b015-b089-45d1-bf95-9eaa2e907714" />
+
+
+  Figura 7.2 - Pantalla de Conexión del Cliente (Flutter):
+
+    Formulario de la aplicación cliente solicitando IP del servidor, puerto y alias de usuario (ConnectScreen).
+  <img width="1332" height="819" alt="imagen" src="https://github.com/user-attachments/assets/0eb635a8-ee6b-4793-b04b-47ac3759aff2" />
+
+
+  Figura 7.3 - Interacción Multiusuario en Tiempo Real:
+
+    Dos o más instancias del cliente intercambiando mensajes con recepción fluida y actualización sincrónica del historial.
+  <img width="1332" height="819" alt="imagen" src="https://github.com/user-attachments/assets/1fc7fada-9631-4861-9bf4-2d26c44b3bac" />
+  <img width="1332" height="819" alt="imagen" src="https://github.com/user-attachments/assets/ecea8de1-250b-4947-b744-e7b9c726462d" />
+
