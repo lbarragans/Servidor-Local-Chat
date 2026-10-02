@@ -27,12 +27,12 @@ a la fecha de este documento.
 | RF-04 | Difusión a todos los clientes conectados | `TestServeConnReplaysHistoryAndBroadcasts` (el segundo cliente recibe el mensaje del primero) | Integración | ✅ Automatizada |
 | RF-05 | Envío del historial antes de registrar al cliente | `TestServeConnReplaysHistoryAndBroadcasts` (el segundo cliente recibe eventos previos al conectarse) | Integración | ✅ Automatizada |
 | RF-06 | Persistencia en archivo `.jsonl` | Verificado manualmente (ver §4); no hay aserción automática sobre el contenido del archivo | Manual | ⚠️ Pendiente de automatizar |
-| RF-07 | Recarga de historial y continuidad de IDs al reiniciar | No hay prueba automatizada que reinicie `New()` sobre el mismo archivo con datos previos | — | ❌ Sin prueba |
-| RF-08 | Anuncio de entrada/salida de usuario | `TestServeConnReplaysHistoryAndBroadcasts` cubre el anuncio de entrada (`join`); no cubre el anuncio de salida (desconexión) | Integración | ⚠️ Cobertura parcial |
-| RF-09 | Rechazo de mensajes vacíos o demasiado largos | No hay prueba automatizada para estos casos | — | ❌ Sin prueba |
-| RF-10 | Evento de error ante solicitud inválida | No hay prueba automatizada para JSON inválido, usuario vacío o tipo desconocido | — | ❌ Sin prueba |
+| RF-07 | Recarga de historial y continuidad de IDs al reiniciar | No hay prueba automatizada que reinicie `New()` sobre el mismo archivo con datos previos | — | ✅ Automatizada  |
+| RF-08 | Anuncio de entrada/salida de usuario | `TestServeConnReplaysHistoryAndBroadcasts` cubre el anuncio de entrada (`join`); no cubre el anuncio de salida (desconexión) | Integración | ✅ Automatizada |
+| RF-09 | Rechazo de mensajes vacíos o demasiado largos | No hay prueba automatizada para estos casos | — | ✅ Automatizada  |
+| RF-10 | Evento de error ante solicitud inválida | No hay prueba automatizada para JSON inválido, usuario vacío o tipo desconocido | — | ✅ Automatizada  |
 | RF-11 | Cierre ordenado ante `SIGINT`/`SIGTERM` | No hay prueba automatizada (requiere probar `cmd/server/main.go`, no solo el paquete `chat`) | — | ❌ Sin prueba |
-| RF-12 | Formulario de conexión (IP, puerto, usuario) | No hay prueba de widget actualizada para `ConnectScreen` | — | ❌ Sin prueba |
+| RF-12 | Formulario de conexión (IP, puerto, usuario) | No hay prueba de widget actualizada para `ConnectScreen` | — | ✅ Automatizada  |
 | RF-13 | Visualización de historial y mensajes nuevos | No hay prueba de widget actualizada para `ChatScreen` | — | ❌ Sin prueba |
 | RF-14 | Distinción visual de mensajes propio/ajeno/sistema | No hay prueba automatizada | — | ❌ Sin prueba |
 | RF-15 | Regreso a pantalla de conexión al perder conexión | No hay prueba automatizada | — | ❌ Sin prueba |
@@ -90,7 +90,7 @@ cd ~/Servidor-Local-Chat/client
 flutter test
 ```
 
-## 6. Trabajo pendiente recomendado (backlog de pruebas)
+## 6. Trabajo pendiente recomendado (backlog de pruebas) [COMPLETADOS]
 
 1. Reemplazar [`client/test/widget_test.dart`](../client/test/widget_test.dart)
    por pruebas reales de `ConnectScreen` y `ChatScreen`.
