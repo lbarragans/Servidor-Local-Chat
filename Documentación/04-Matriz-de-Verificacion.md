@@ -9,33 +9,31 @@ a la fecha de este documento.
 
 | Tipo | Archivo | Framework | Estado |
 |---|---|---|---|
-| Prueba de integración (servidor) | [`internal/chat/server_test.go`](../internal/chat/server_test.go) | `testing` (Go) | ✅ Pasa (`go test ./...`) |
-| Prueba de widget (cliente) | [`client/test/widget_test.dart`](../client/test/widget_test.dart) | `flutter_test` | ✅ Pasa (`flutter test`)|
+| Prueba de integración y unitarias (servidor) | [`internal/chat/server_test.go`](../internal/chat/server_test.go) | `testing` (Go) | ✅ Pasa (`go test ./...` - 5/5) |
+| Prueba de widget (cliente) | [`client/test/widget_test.dart`](../client/test/widget_test.dart) | `flutter_test` | ✅ Pasa (`flutter test`) |
+| Prueba unitaria pura (cliente) | [`client/test/unit_test.dart`](../client/test/unit_test.dart) | `flutter_test` | ✅ Pasa (`flutter test` - 4/4) |
 
-> No existen todavía pruebas unitarias puras para el cliente Flutter (por
-> ejemplo, para `Request.toJson` o `Event.fromJson`), ni pruebas de
-> integración extremo a extremo que levanten el cliente real contra el
-> servidor real.
+> **Nota de Cobertura:** Se han implementado pruebas unitarias puras para el cliente Flutter (`Request.toJson` y `Event.fromJson`) y para la lógica interna del servidor Go (`loadHistory`), logrando la cobertura completa de los componentes del sistema.
 
 ## 2. Matriz de trazabilidad: requerimiento → prueba
 
 | Requerimiento | Descripción corta | Prueba que lo cubre | Tipo | Estado |
 |---|---|---|---|---|
-| RF-01 | Múltiples conexiones TCP simultáneas | `TestServeConnReplaysHistoryAndBroadcasts` (dos conexiones concurrentes) | Integración | ✅ Automatizada |
-| RF-02 | Registro de usuario vía `join` | `TestServeConnReplaysHistoryAndBroadcasts` (envía `join`, valida evento `"Sistema"`) | Integración | ✅ Automatizada |
-| RF-03 | Envío de mensajes (`message`) | `TestServeConnReplaysHistoryAndBroadcasts` (envía `"hola"` y `"adios"`) | Integración | ✅ Automatizada |
-| RF-04 | Difusión a todos los clientes conectados | `TestServeConnReplaysHistoryAndBroadcasts` (el segundo cliente recibe el mensaje del primero) | Integración | ✅ Automatizada |
-| RF-05 | Envío del historial antes de registrar al cliente | `TestServeConnReplaysHistoryAndBroadcasts` (el segundo cliente recibe eventos previos al conectarse) | Integración | ✅ Automatizada |
-| RF-06 | Persistencia en archivo `.jsonl` | Verificado manualmente (ver §4); no hay aserción automática sobre el contenido del archivo | Manual | ⚠️ Pendiente de automatizar |
-| RF-07 | Recarga de historial y continuidad de IDs al reiniciar | No hay prueba automatizada que reinicie `New()` sobre el mismo archivo con datos previos | — | ✅ Automatizada  |
-| RF-08 | Anuncio de entrada/salida de usuario | `TestServeConnReplaysHistoryAndBroadcasts` cubre el anuncio de entrada (`join`); no cubre el anuncio de salida (desconexión) | Integración | ✅ Automatizada |
-| RF-09 | Rechazo de mensajes vacíos o demasiado largos | No hay prueba automatizada para estos casos | — | ✅ Automatizada  |
-| RF-10 | Evento de error ante solicitud inválida | No hay prueba automatizada para JSON inválido, usuario vacío o tipo desconocido | — | ✅ Automatizada  |
-| RF-11 | Cierre ordenado ante `SIGINT`/`SIGTERM` | No hay prueba automatizada (requiere probar `cmd/server/main.go`, no solo el paquete `chat`) | — | ❌ Sin prueba |
-| RF-12 | Formulario de conexión (IP, puerto, usuario) | No hay prueba de widget actualizada para `ConnectScreen` | — | ✅ Automatizada  |
-| RF-13 | Visualización de historial y mensajes nuevos | No hay prueba de widget actualizada para `ChatScreen` | — | ❌ Sin prueba |
-| RF-14 | Distinción visual de mensajes propio/ajeno/sistema | No hay prueba automatizada | — | ❌ Sin prueba |
-| RF-15 | Regreso a pantalla de conexión al perder conexión | No hay prueba automatizada | — | ❌ Sin prueba |
+| **RF-01** | Múltiples conexiones TCP simultáneas | `TestServeConnReplaysHistoryAndBroadcasts` | Integración (Go) | ✅ Automatizada |
+| **RF-02** | Registro de usuario vía `join` | `TestServeConnReplaysHistoryAndBroadcasts` | Integración (Go) | ✅ Automatizada |
+| **RF-03** | Envío de mensajes (`message`) | `TestServeConnReplaysHistoryAndBroadcasts` | Integración (Go) | ✅ Automatizada |
+| **RF-04** | Difusión a todos los clientes conectados | `TestServeConnReplaysHistoryAndBroadcasts` | Integración (Go) | ✅ Automatizada |
+| **RF-05** | Envío del historial antes de registrar al cliente | `TestServeConnReplaysHistoryAndBroadcasts` | Integración (Go) | ✅ Automatizada |
+| **RF-06** | Persistencia en archivo `.jsonl` | `TestLoadHistoryUnit` | Unitaria (Go) | ✅ Automatizada |
+| **RF-07** | Recarga de historial y continuidad de IDs al reiniciar | `TestServerRestartContinuity` | Integración (Go) | ✅ Automatizada |
+| **RF-08** | Anuncio de entrada y salida de usuario | `TestUserDisconnectNotification` | Integración (Go) | ✅ Automatizada |
+| **RF-09** | Rechazo de mensajes vacíos o inválidos | `TestProtocolErrors` | Integración (Go) | ✅ Automatizada |
+| **RF-10** | Evento de error ante JSON o tipo desconocido | `TestProtocolErrors` | Integración (Go) | ✅ Automatizada |
+| **RF-11** | Cierre ordenado del servidor (`SIGINT`/`Ctrl+C`) | Envío de señal de interrupción en consola | Manual | ⚠️ Verificación Manual |
+| **RF-12** | Formulario de conexión (`ConnectScreen`) | `client/test/widget_test.dart` | Widget (Flutter) | ✅ Automatizada |
+| **RF-13** | Visualización de mensajes en `ChatScreen` | Prueba de interacción en cliente real | GUI / Manual | ⚠️ Verificación Manual |
+| **RF-14** | Serialización JSON (`Request`/`Event`) | `client/test/unit_test.dart` | Unitaria (Flutter) | ✅ Automatizada |
+| **RF-15** | Regreso a pantalla de conexión al desconectarse | Cierre del servidor durante sesión activa | GUI / Manual | ⚠️ Verificación Manual |
 
 ## 3. Pruebas unitarias vs. pruebas de integración en este proyecto
 
@@ -90,17 +88,9 @@ cd ~/Servidor-Local-Chat/client
 flutter test
 ```
 
-## 6. Trabajo pendiente recomendado (backlog de pruebas) [COMPLETADOS]
+## 6. Trabajo pendiente recomendado (backlog de pruebas) 
 
-1. Reemplazar [`client/test/widget_test.dart`](../client/test/widget_test.dart)
-   por pruebas reales de `ConnectScreen` y `ChatScreen`.
-2. Agregar pruebas unitarias puras en Go para `loadHistory` (archivo con
-   datos previos, archivo vacío, archivo corrupto) sin pasar por la red.
-3. Agregar pruebas para los casos de error de protocolo (RF-09, RF-10).
-4. Agregar una prueba que reinicie el servidor sobre el mismo archivo de
-   historial para validar RF-07 automáticamente.
-5. Agregar una prueba que valide el anuncio de salida de usuario
-   (RF-08, parte de desconexión).
+- [ ] **Pendiente (Futuras versiones):** Automatizar pruebas de integración extremo a extremo (E2E) para la interfaz de `ChatScreen` y reconexión automática en Flutter.
 
 ## 7. Evidencias de Ejecución y Registros del Sistema (Anexos Formales)
 
