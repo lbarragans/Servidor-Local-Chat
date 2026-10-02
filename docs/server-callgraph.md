@@ -214,13 +214,3 @@ SIGINT/SIGTERM
     ├── cierra conexiones de clientes
     └── cierra archivo de historial
 ```
-
-## 10. Resumen para exposición
-
-> `main` inicializa el servidor y espera conexiones TCP. Cada conexión se
-> atiende en una goroutine mediante `ServeConn`. Al conectarse, `register`
-> envía el historial. Cada línea JSON se valida y se procesa como `join` o
-> `message`. Los mensajes pasan por `publish`, que les asigna un ID, los guarda
-> en JSONL y los difunde a todos los clientes. Cuando una conexión termina,
-> `unregister` la elimina y publica el aviso de desconexión. Los mutexes
-> protegen el estado compartido y las escrituras concurrentes.
