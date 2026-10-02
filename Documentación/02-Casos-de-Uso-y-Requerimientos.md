@@ -124,7 +124,7 @@ Para completar esta sección, el equipo debería definir y aportar:
 
 1. **Requerimientos de desempeño**: por ejemplo, cantidad esperada de
    usuarios simultáneos. Actualmente el código no impone un
-   límite de clientes conectados aunque el docente nos comentó de un límite de máximo 10 personas simultáneas.
+   límite de clientes conectados aunque el docente nos comentó de que no se aseguraba que el chat funcionará al superar 10 clientes.
 2. **Requerimientos de seguridad**: si se van a agregar (por ejemplo,
    autenticación de usuarios, cifrado de la conexión). Hasta el momento, el sistema no
    implementa ninguno de los dos.
