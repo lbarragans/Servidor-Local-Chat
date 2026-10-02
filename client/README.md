@@ -15,3 +15,8 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## Callgraph del cliente
+
+La explicación del flujo de llamadas del cliente Flutter está en
+[`docs/client-callgraph.md`](../docs/client-callgraph.md).
