@@ -10,7 +10,7 @@ a la fecha de este documento.
 | Tipo | Archivo | Framework | Estado |
 |---|---|---|---|
 | Prueba de integración (servidor) | [`internal/chat/server_test.go`](../internal/chat/server_test.go) | `testing` (Go) | ✅ Pasa (`go test ./...`) |
-| Prueba de widget (cliente) | [`client/test/widget_test.dart`](../client/test/widget_test.dart) | `flutter_test` | ⚠️ Desactualizada: es la plantilla por defecto de `flutter create` y prueba una clase `MyApp` que ya no existe en [`client/lib/main.dart`](../client/lib/main.dart) (la app real se llama `ChatApp`). No valida la lógica de chat. |
+| Prueba de widget (cliente) | [`client/test/widget_test.dart`](../client/test/widget_test.dart) | `flutter_test` | ✅ Pasa (`flutter test`)|
 
 > No existen todavía pruebas unitarias puras para el cliente Flutter (por
 > ejemplo, para `Request.toJson` o `Event.fromJson`), ni pruebas de
