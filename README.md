@@ -111,3 +111,11 @@ En caso de un error en la solicitud, el servidor devolverá:
 La explicación del flujo de llamadas del servidor, incluyendo arranque,
 conexiones, historial, difusión, concurrencia y apagado, está disponible en
 [`docs/server-callgraph.md`](docs/server-callgraph.md).
+
+## Métricas de rendimiento
+
+CDD Connect incluye monitorización en tiempo real de latencia, jitter, uso de CPU, memoria del servidor, usuarios conectados y mensajes recibidos.
+
+La descripción de cada métrica, sus rangos orientativos y las pruebas recomendadas están disponibles en:
+
+[`docs/metrics.md`](docs/metrics.md)
