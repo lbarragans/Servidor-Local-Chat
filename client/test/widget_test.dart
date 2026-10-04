@@ -6,23 +6,21 @@ void main() {
   testWidgets('Muestra la pantalla principal de CDD Connect', (
     WidgetTester tester,
   ) async {
-    // Simula una ventana de escritorio.
-    await tester.binding.setSurfaceSize(const Size(1200, 800));
+    await tester.binding.setSurfaceSize(const Size(1200, 900));
 
     addTearDown(() async {
       await tester.binding.setSurfaceSize(null);
     });
 
-    // Construye la aplicación.
     await tester.pumpWidget(const ChatApp());
 
-    // Permite que LayoutBuilder, assets y demás widgets
-    // terminen de construir la pantalla.
     await tester.pumpAndSettle();
 
     expect(find.text('CDD Connect'), findsOneWidget);
 
-    expect(find.text('Chat local · Sistemas Embebidos Linux'), findsOneWidget);
+    expect(find.text('Chat local corporativo'), findsOneWidget);
+
+    expect(find.text('Sistemas Embebidos Linux'), findsWidgets);
 
     expect(find.text('Dirección IP del servidor'), findsOneWidget);
 
@@ -32,6 +30,13 @@ void main() {
 
     expect(find.text('Entrar al chat'), findsOneWidget);
 
-    expect(find.text('Universidad Nacional de Colombia'), findsOneWidget);
+    expect(find.text('Equipo CDD'), findsOneWidget);
+
+    expect(find.text('Camilo  •  Daniela  •  David'), findsOneWidget);
+
+    expect(
+      find.text('Proyecto académico · Universidad Nacional de Colombia'),
+      findsOneWidget,
+    );
   });
 }
