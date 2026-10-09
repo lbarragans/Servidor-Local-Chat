@@ -1,30 +1,42 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:client/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:client/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Muestra la pantalla principal de CDD Connect', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 900));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(null);
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.pumpWidget(const ChatApp());
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.pumpAndSettle();
+
+    expect(find.text('CDD Connect'), findsOneWidget);
+
+    expect(find.text('Chat local corporativo'), findsOneWidget);
+
+    expect(find.text('Sistemas Embebidos Linux'), findsWidgets);
+
+    expect(find.text('Dirección IP del servidor'), findsOneWidget);
+
+    expect(find.text('Puerto'), findsOneWidget);
+
+    expect(find.text('Tu nombre'), findsOneWidget);
+
+    expect(find.text('Entrar al chat'), findsOneWidget);
+
+    expect(find.text('Equipo CDD'), findsOneWidget);
+
+    expect(find.text('Camilo  •  Daniela  •  David'), findsOneWidget);
+
+    expect(
+      find.text('Proyecto académico · Universidad Nacional de Colombia'),
+      findsOneWidget,
+    );
   });
 }
