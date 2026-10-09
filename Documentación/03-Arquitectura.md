@@ -34,6 +34,7 @@ flowchart LR
 | `main` | [`cmd/server/main.go`](../cmd/server/main.go) | Lee banderas de configuración, crea el servidor, abre el listener TCP y acepta conexiones. |
 | `chat.Server` | [`internal/chat/server.go`](../internal/chat/server.go) | Mantiene el historial en memoria, la lista de clientes conectados y el archivo de persistencia. |
 | `chat.client` | [`internal/chat/server.go`](../internal/chat/server.go) | Representa una conexión TCP individual y el usuario asociado a ella. |
+| `Server.processMetrics` | [`internal/chat/server.go`](../internal/chat/server.go) | Calcula CPU (`Getrusage`), memoria residente (`/proc/self/statm`) y usuarios conectados para responder a `ping`. |
 
 El servidor usa una goroutine por cada conexión aceptada
 (`go server.ServeConn(conn)`), lo que permite atender múltiples clientes en
@@ -48,7 +49,7 @@ El detalle llamada por llamada está documentado en
 |---|---|---|
 | `ChatApp` | [`client/lib/main.dart`](../client/lib/main.dart) | Widget raíz de la aplicación. |
 | `ConnectScreen` | [`client/lib/main.dart`](../client/lib/main.dart) | Captura IP, puerto y usuario; abre el `Socket` TCP. |
-| `ChatScreen` | [`client/lib/main.dart`](../client/lib/main.dart) | Escucha el socket, decodifica eventos JSON y muestra la conversación; permite enviar mensajes. |
+| `ChatScreen` | [`client/lib/main.dart`](../client/lib/main.dart) | Escucha el socket, decodifica eventos JSON y muestra la conversación; permite enviar mensajes; envía `ping` periódicos y muestra latencia, jitter y métricas del servidor. |
 
 El detalle llamada por llamada está documentado en
 [`docs/client-callgraph.md`](../docs/client-callgraph.md).
@@ -59,9 +60,10 @@ El detalle llamada por llamada está documentado en
 
 ```go
 type Request struct {
-    Type string // "join" o "message"
-    User string
-    Text string // solo para "message"
+    Type      string // "join", "message" o "ping"
+    User      string
+    Text      string // solo para "message"
+    Timestamp int64  // solo para "ping" (microsegundos)
 }
 ```
 
@@ -69,13 +71,21 @@ type Request struct {
 
 ```go
 type Event struct {
-    Type string // "message" o "error"
+    Type string // "message", "error" o "pong"
     ID   uint64
     User string
     Text string
     Time time.Time
+
+    Timestamp      int64   // eco del ping (pong)
+    CPUPercent     float64 // pong
+    MemoryBytes    uint64  // pong
+    ConnectedUsers int     // pong
 }
 ```
+
+Solo los eventos de tipo `message` se persisten; `error` y `pong` se envían
+únicamente al cliente que los originó.
 
 ### Persistencia
 
@@ -87,7 +97,10 @@ memoria (`Server.history`) y calcular el siguiente ID disponible.
 ## 4. Concurrencia y sincronización
 
 - `Server.mu` (`sync.Mutex`): protege `history`, `clients` y `nextID`. Se
-  usa en `register`, `unregister` y `publish`.
+  usa en `register`, `unregister`, `publish` y `processMetrics`.
+- `Server.metricsMu` (`sync.Mutex`): protege las muestras de CPU
+  (`lastCPUTime`, `lastCPUSampleAt`) usadas para calcular el porcentaje entre
+  dos `ping`.
 - `client.mu` (`sync.Mutex`): evita que dos goroutines escriban al mismo
   tiempo sobre la misma conexión TCP (por ejemplo, un broadcast y un envío
   de error simultáneos).

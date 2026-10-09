@@ -34,6 +34,8 @@ a la fecha de este documento.
 | **RF-13** | Visualización de mensajes en `ChatScreen` | Prueba de interacción en cliente real | GUI / Manual | ⚠️ Verificación Manual |
 | **RF-14** | Serialización JSON (`Request`/`Event`) | `client/test/unit_test.dart` | Unitaria (Flutter) | ✅ Automatizada |
 | **RF-15** | Regreso a pantalla de conexión al desconectarse | Cierre del servidor durante sesión activa | GUI / Manual | ⚠️ Verificación Manual |
+| **RF-16** | Respuesta `pong` con métricas del servidor | Sin prueba automatizada (verificable manualmente con `nc`) | Manual | ❌ Sin prueba |
+| **RF-17** | Cálculo y visualización de latencia, jitter y métricas en el cliente | Observación del panel de métricas en el cliente real | GUI / Manual | ⚠️ Verificación Manual |
 
 ## 3. Pruebas unitarias vs. pruebas de integración en este proyecto
 

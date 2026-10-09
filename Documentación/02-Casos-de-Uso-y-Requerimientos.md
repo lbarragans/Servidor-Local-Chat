@@ -88,6 +88,20 @@ Código relacionado: `Server.loadHistory` y `Server.publish` en
   solicitud desconocido).
 - El cliente muestra ese error en pantalla sin desconectar al usuario.
 
+### HU-07 — Monitorear el estado del servidor
+
+> Como usuario o administrador, quiero ver la latencia, el jitter y el uso de
+> recursos del servidor, para saber si el sistema funciona correctamente.
+
+**Criterios de aceptación**
+- El cliente envía un `ping` cada 2 segundos.
+- El servidor responde con un `pong` con CPU, memoria y usuarios conectados.
+- El cliente muestra latencia, jitter y esas métricas en un panel desplegable.
+
+Código relacionado: `_startMetrics`/`_sendPing` en
+[`client/lib/main.dart`](../client/lib/main.dart) y `Server.processMetrics`
+en [`internal/chat/server.go`](../internal/chat/server.go).
+
 ## 2. Requerimientos funcionales (RF)
 
 | ID | Requerimiento |
@@ -107,13 +121,15 @@ Código relacionado: `Server.loadHistory` y `Server.publish` en
 | RF-13 | El cliente debe mostrar el historial y los mensajes nuevos en una misma vista de conversación. |
 | RF-14 | El cliente debe distinguir visualmente los mensajes propios, los de otros usuarios y los del sistema. |
 | RF-15 | El cliente debe notificar al usuario y regresar a la pantalla de conexión si el servidor cierra la conexión. |
+| RF-16 | El servidor debe responder a una solicitud `ping` con un evento `pong` que devuelva el `timestamp` recibido y las métricas `cpu_percent`, `memory_bytes` y `connected_users`, sin guardarlo en el historial. |
+| RF-17 | El cliente debe enviar un `ping` periódico (cada 2 segundos), calcular latencia y jitter con el `pong` y mostrarlos junto con las métricas del servidor en un panel de monitoreo. |
 
 ## 3. Requerimientos no funcionales (RNF)
 
 | ID | Requerimiento |
 |---|---|
 | RNF-01 | El servidor debe estar escrito en Go y ejecutarse en Linux (compatible con sistemas embebidos basados en Linux). |
-| RNF-02 | El acceso concurrente al estado compartido del servidor (historial, lista de clientes, contador de IDs) debe protegerse con mecanismos de exclusión mutua. |
+| RNF-02 | El acceso concurrente al estado compartido del servidor (historial, lista de clientes, contador de IDs y muestras de CPU) debe protegerse con mecanismos de exclusión mutua. |
 | RNF-03 | El protocolo de comunicación debe ser texto plano, legible y basado en JSON, para facilitar depuración e interoperabilidad. |
 | RNF-04 | El límite de longitud de un mensaje debe calcularse en caracteres Unicode, no en bytes, para soportar tildes y otros caracteres multibyte. |
 | RNF-05 | El cliente debe funcionar como aplicación de escritorio Flutter (Linux/Windows) usando sockets TCP directos. |

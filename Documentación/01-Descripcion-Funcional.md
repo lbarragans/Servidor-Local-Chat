@@ -40,6 +40,11 @@ El proyecto tiene dos componentes:
   formado, usuario vacío, texto vacío, texto demasiado largo o tipo de
   solicitud desconocido).
 - Cierra ordenadamente el servidor ante `Ctrl+C` (`SIGINT`) o `SIGTERM`.
+- Responde a solicitudes `ping` con un `pong` que incluye métricas del
+  proceso servidor: porcentaje de CPU, memoria residente y número de usuarios
+  conectados.
+- El cliente envía un `ping` cada 2 segundos y muestra latencia, jitter y las
+  métricas del servidor en un panel desplegable.
 
 ## 3. Fuera de alcance actual (posible alcance futuro)
 
@@ -76,6 +81,12 @@ Enviar un mensaje:
 {"type":"message","user":"camilo","text":"Hola a todos"}
 ```
 
+Medir el estado del servidor (`timestamp` en microsegundos, lo fija el cliente):
+
+```json
+{"type":"ping","user":"camilo","timestamp":1760000000000000}
+```
+
 ### Eventos del servidor al cliente
 
 Mensaje de chat (incluye los del historial y los nuevos):
@@ -88,6 +99,13 @@ Error de protocolo:
 
 ```json
 {"type":"error","text":"a message requires text"}
+```
+
+Respuesta a `ping` (devuelve el mismo `timestamp` y no se guarda en el
+historial):
+
+```json
+{"type":"pong","timestamp":1760000000000000,"cpu_percent":1.5,"memory_bytes":12345678,"connected_users":3}
 ```
 
 ## 5. Actores del sistema
