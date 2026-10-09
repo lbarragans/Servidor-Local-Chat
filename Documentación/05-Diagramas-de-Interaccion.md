@@ -137,7 +137,36 @@ Código relacionado: `defer s.unregister(client)` en `Server.ServeConn` y
 y `onDone`/`onError`/`_handleDisconnect` en
 [`client/lib/main.dart`](../client/lib/main.dart).
 
-## 6. Relación con los demás diagramas del proyecto
+## 6. Medición de métricas (`ping` / `pong`)
+
+```mermaid
+sequenceDiagram
+    participant C as Cliente (ChatScreen)
+    participant S as Servidor (ServeConn)
+    participant M as processMetrics
+
+    loop cada 2 segundos (Timer.periodic)
+        C->>S: {"type":"ping","user":"A","timestamp":t0}
+        S->>M: processMetrics()
+        M->>M: Getrusage (CPU) y /proc/self/statm (memoria)
+        M->>M: Cuenta clientes con usuario identificado
+        M-->>S: cpu, memoria, usuarios conectados
+        S-->>C: {"type":"pong","timestamp":t0,"cpu_percent":..,"memory_bytes":..,"connected_users":..}
+        C->>C: latencia = ahora - t0, jitter = abs(latencia - anterior)
+        C->>C: Actualiza el panel de métricas
+    end
+```
+
+El `pong` solo se envía al cliente que hizo el `ping` y no se guarda en el
+historial. La latencia se mide en el cliente con el `timestamp` que el
+servidor devuelve sin modificar.
+
+Código relacionado: `_startMetrics`, `_sendPing` y `_listenSocket` en
+[`client/lib/main.dart`](../client/lib/main.dart), y el caso `"ping"` de
+`Server.ServeConn` junto con `Server.processMetrics` en
+[`internal/chat/server.go`](../internal/chat/server.go).
+
+## 7. Relación con los demás diagramas del proyecto
 
 - Los **callgraphs** ([`docs/server-callgraph.md`](../docs/server-callgraph.md)
   y [`docs/client-callgraph.md`](../docs/client-callgraph.md)) muestran qué
@@ -149,7 +178,7 @@ y `onDone`/`onError`/`_handleDisconnect` en
   [`03-Arquitectura.md`](03-Arquitectura.md) complementa esta vista
   mostrando dónde corre cada componente físicamente.
 
-## 7. Información pendiente por parte del equipo
+## 8. Información pendiente por parte del equipo
 
 1. Confirmar si se requiere un diagrama de interacción adicional para algún
    caso de uso específico pedido por el docente que no esté cubierto aquí.

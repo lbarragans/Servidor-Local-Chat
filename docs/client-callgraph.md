@@ -23,8 +23,14 @@ flowchart TD
     N --> O[initState]
     O --> P[_listenSocket]
     P --> Q[decodificar stream TCP]
+    O --> PM[_startMetrics]
+    PM --> PP[Timer periodic 2 s]
+    PP --> PS[_sendPing]
+    PS --> K
     Q --> R[jsonDecode]
     R --> S[Event fromJson]
+    S -->|type pong| PL[calcular latencia y jitter]
+    PL --> PU[actualizar panel de métricas]
     S --> T[actualizar lista de mensajes]
     T --> U[scrollToBottom]
     N --> V[usuario escribe texto]
@@ -34,7 +40,9 @@ flowchart TD
     Q --> Y[stream done o error]
     Y --> Z[_handleDisconnect]
     Z --> AA[volver a ConnectScreen]
+    Z --> ZT[cancelar Timer de ping]
     N --> AB[dispose]
+    AB --> ZT
     AB --> AC[socket destroy]
 ```
 
@@ -64,13 +72,14 @@ main
 Request
 ├── type
 ├── user
-└── text opcional
+├── text opcional
+└── timestamp opcional (solo en ping)
     └── toJson
         └── Map<String, dynamic>
             └── jsonEncode
 ```
 
-El cliente utiliza dos tipos:
+El cliente utiliza tres tipos:
 
 ```json
 {"type":"join","user":"ana"}
@@ -78,6 +87,10 @@ El cliente utiliza dos tipos:
 
 ```json
 {"type":"message","user":"ana","text":"Hola"}
+```
+
+```json
+{"type":"ping","user":"ana","timestamp":1760000000000000}
 ```
 
 ### `Event`
@@ -91,11 +104,16 @@ jsonDecode
     ├── id
     ├── user
     ├── text
-    └── time
-        └── DateTime.parse(...).toLocal()
+    ├── time
+    │   └── DateTime.parse(...).toLocal()
+    ├── timestamp
+    ├── cpu_percent
+    ├── memory_bytes
+    └── connected_users
 ```
 
-Los eventos pueden ser mensajes del chat o respuestas de error.
+Los eventos pueden ser mensajes del chat, respuestas de error o `pong`
+(respuesta a un `ping`, con las métricas del servidor).
 
 ## 4. Flujo de conexión
 
@@ -139,6 +157,10 @@ ChatScreen.initState
             │   ├── ignora líneas vacías
             │   ├── jsonDecode
             │   ├── Event.fromJson
+            │   ├── si type = pong
+            │   │   ├── latencia = ahora - timestamp
+            │   │   ├── jitter = |latencia - latencia anterior|
+            │   │   └── setState: latencia, jitter, CPU, memoria, usuarios
             │   ├── si type = message
             │   │   ├── _messages.add
             │   │   └── _scrollToBottom
@@ -157,6 +179,24 @@ la misma conexión TCP.
 El historial se recibe por este mismo flujo: para el cliente no hay una ruta
 especial, porque el servidor lo envía como eventos `message` inmediatamente
 después de conectarse.
+
+## 5.1 Métricas (ping/pong)
+
+```text
+ChatScreen.initState
+└── _startMetrics
+    ├── _sendPing (inmediato)
+    └── Timer.periodic(2 s) → _sendPing
+        ├── si !_connected: no hace nada
+        ├── crea Request ping con timestamp (microsegundos)
+        ├── jsonEncode + socket.writeln
+        └── si falla: _handleDisconnect
+```
+
+Cuando llega el `pong`, `_listenSocket` calcula la latencia en milisegundos
+y el jitter (diferencia con la latencia anterior) y actualiza los valores de
+CPU, memoria y usuarios conectados que el servidor informó. Estos datos se
+muestran en el panel de métricas desplegable (`_buildMetricsPanel`).
 
 ## 6. Envío de mensajes
 
@@ -204,17 +244,20 @@ Socket stream
 ├── onDone
 └── onError
     └── _handleDisconnect
+        ├── marca _connected = false
+        ├── cancela _pingTimer
         ├── muestra SnackBar
         └── vuelve a ConnectScreen
 
 ChatScreen.dispose
+├── _pingTimer.cancel
 ├── socket.destroy
 ├── _msgController.dispose
 └── _scrollController.dispose
 ```
 
-`dispose` libera la conexión TCP y los controladores de Flutter para evitar
-recursos abiertos cuando la pantalla deja de existir.
+`dispose` libera el temporizador, la conexión TCP y los controladores de
+Flutter para evitar recursos abiertos cuando la pantalla deja de existir.
 
 ## 9. Resumen para exposición
 
@@ -223,6 +266,7 @@ recursos abiertos cuando la pantalla deja de existir.
 > un socket TCP y envía una solicitud `join`. Después navega a `ChatScreen`,
 > que escucha el socket, separa cada línea JSON, crea objetos `Event` y
 > actualiza la lista visual. Para enviar mensajes, `_sendMessage` serializa
-> un `Request` y lo escribe en el socket. Los eventos del historial y los
-> mensajes nuevos siguen el mismo flujo de recepción. Si el socket termina o
-> falla, `_handleDisconnect` devuelve al usuario a la pantalla de conexión.
+> un `Request` y lo escribe en el socket. Cada 2 segundos envía un `ping` y,
+> con el `pong`, calcula latencia y jitter y muestra CPU, memoria y usuarios
+> del servidor. Si el socket termina o falla, `_handleDisconnect` devuelve al
+> usuario a la pantalla de conexión.

@@ -29,6 +29,9 @@ flowchart TD
     Q --> R[publish entrada]
     O -->|tipo message| S[validar usuario y texto]
     S --> T[publish mensaje]
+    O -->|tipo ping| PG[processMetrics]
+    PG --> PH[send pong con métricas]
+    PH --> L
     O -->|tipo desconocido| U[send error]
     U --> L
     T --> V[json Marshal]
@@ -76,7 +79,7 @@ Server.ServeConn
 │   └── agrega client a Server.clients
 ├── scanner.Scan
 │   ├── json.Unmarshal
-│   ├── procesa join o message
+│   ├── procesa ping, join o message
 │   └── continúa hasta desconexión
 └── unregister
     ├── elimina client de Server.clients
@@ -143,6 +146,35 @@ ServeConn
                 └── writeEvent
 ```
 
+## 5.1 Solicitud `ping` (métricas)
+
+El cliente envía periódicamente:
+
+```json
+{"type":"ping","user":"ana","timestamp":1760000000000000}
+```
+
+La ruta de llamadas es:
+
+```text
+ServeConn
+└── case "ping"
+    ├── processMetrics
+    │   ├── bloquea Server.metricsMu
+    │   ├── syscall.Getrusage(RUSAGE_SELF)
+    │   │   └── calcula % de CPU contra la muestra anterior
+    │   ├── os.ReadFile("/proc/self/statm")
+    │   │   └── calcula memoria residente en bytes
+    │   └── bloquea Server.mu y cuenta clientes con usuario
+    └── send(Event{Type: "pong", ...})
+        └── writeEvent
+```
+
+El `pong` devuelve el mismo `timestamp` recibido (el cliente lo usa para medir
+latencia) junto con `cpu_percent`, `memory_bytes` y `connected_users`. Igual
+que los errores, el `pong` se envía solo al cliente que hizo el `ping` y no
+se guarda en el historial.
+
 ## 6. Errores de protocolo
 
 ```text
@@ -192,9 +224,11 @@ al archivo.
 
 ## 8. Sincronización
 
-Hay dos mutexes:
+Hay tres mutexes:
 
 - `Server.mu`: protege `history`, `clients` y `nextID`.
+- `Server.metricsMu`: protege `lastCPUTime` y `lastCPUSampleAt`, usados por
+  `processMetrics` para calcular el porcentaje de CPU entre dos `ping`.
 - `client.mu`: evita que dos goroutines escriban simultáneamente en la misma
   conexión TCP.
 

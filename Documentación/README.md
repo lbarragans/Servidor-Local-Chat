@@ -22,7 +22,8 @@ la documentación técnica ya existente en:
    procedimiento de verificación manual y backlog de pruebas pendientes.
 5. [Diagramas de Interacción](05-Diagramas-de-Interaccion.md): diagramas de
    secuencia (join, envío de mensaje/broadcast, reenvío de historial,
-   manejo de errores y desconexión) entre el cliente y el servidor.
+   manejo de errores, desconexión y métricas ping/pong) entre el cliente y
+   el servidor.
 
 ## Estado y alcance de este contenido
 
